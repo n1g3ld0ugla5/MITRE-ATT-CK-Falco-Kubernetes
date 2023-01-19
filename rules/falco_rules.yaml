@@ -1,0 +1,35 @@
+# MITRE ATT&CK Tactic: Execution
+# 13 techniques [https://attack.mitre.org/]
+# 1. Command and Scripting Interpreter [id: T1059]
+# 2. Container Administration Command
+# 3. Deploy Container
+# 4. Exploitation for Client Executiom
+# 5. 
+#
+#
+# Command and Scripting Interpreter: Unix Shell [id: .004]
+# Adversaries may abuse Unix shell commands and scripts for execution. 
+# Unix shells are the primary command prompt on Linux and macOS systems. 
+# though many variations of the Unix shell exist (e.g. sh, bash, zsh, etc.) depending on the specific OS or distribution. 
+# Unix shells can control every aspect of a system, with certain commands requiring elevated privileges.
+
+- rule: Detect Unix shell interpreter
+  desc: Attempts to detect a Command and Scripting Interpreter such as Unix Shell
+  condition: (proc.name=sh or proc.name=bash or proc.name=zsh or proc.name=ash) and (evt.type=execve or evt.type=execvp)
+  output: "Unix shell interpreter (sh, bash, zsh, ash) detected in process name=%proc.name command=%proc.cmdline"
+  priority: WARNING
+  tags: [host, mitre_execution, T1059]
+  
+# This rule checks for the process names "sh", "bash", "zsh", "ash" and for the events "execve" or "execvp"
+#
+# execve() executes the program referred to by pathname. (https://man7.org/linux/man-pages/man2/execve.2.html
+# This causes the program that is currently being run by the calling process to be replaced with a new program
+# In this case, it's replaced with a newly initialized stack, heap, and (initialized and uninitialized) data segments.
+#
+# execvp() function replaces the current process image with a new process image specified by file. 
+# The new image is constructed from a regular, executable file called the new process image file. 
+# No return is made because the calling process image is replaced by the new process image.
+# (https://www.qnx.com/developers/docs/6.5.0SP1.update/com.qnx.doc.neutrino_lib_ref/e/execvp.html)
+#
+# This way it can detect the use of a Unix shell interpreter. 
+# If a match is found, the rule will output a warning message with the process name and command line arguments used.
